@@ -63,7 +63,7 @@ public class MyBuffer<O> {
 	}
 
 	public void init() {
-		//TODO
+	    new Thread(new RetireThread()).start();
 	}
 
 	public void put(String key, O value) {
@@ -87,7 +87,21 @@ public class MyBuffer<O> {
 
 		@Override
 		public void run() {
-			// TOTO
+
+		    while(true){
+
+		        if(dataMap.size() > maxLen){
+		            delete();
+		        }
+
+		        try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+		    }
+
 		}
 
 	}

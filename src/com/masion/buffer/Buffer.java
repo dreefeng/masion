@@ -88,4 +88,18 @@ public class Buffer {
 	public static void setList(List<String> list) {
 		Buffer.list = list;
 	}
+
+	public static void main(String[] argv){
+	    ConcurrentHashMap<String, String> map1 = new ConcurrentHashMap<String, String>();
+	    for(int i=0; i<10; i++){
+	        String key = "" + i;
+	        String value = "" + i;
+	        String result = map1.putIfAbsent(key, value);
+	        System.out.println(result);
+            System.out.println(map1.get(key));
+        }
+	}
+
+
+
 }

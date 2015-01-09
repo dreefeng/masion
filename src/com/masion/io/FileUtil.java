@@ -272,6 +272,39 @@ public class FileUtil {
 	    return tmpPath;
 	}
 
+	public static boolean deleteDir(File file)
+    {
+        boolean result = false;
+        if(file == null)
+        {
+            return result;
+        }
+
+        if(file.isDirectory())
+        {
+            File[] subFiles = file.listFiles();
+            if(subFiles == null)
+            {
+                result = file.delete();
+            }
+            else
+            {
+                for(File subFile : subFiles)
+                {
+                    deleteDir(subFile);
+                }
+            }
+            result = file.delete();
+        }
+        else
+        {
+            result = file.delete();
+        }
+
+        System.out.println("del file : " + file.getAbsolutePath() + "; result : " + result);
+
+        return result;
+    }
 
 	public static void main(String[] args) {
 
@@ -279,8 +312,8 @@ public class FileUtil {
 //		System.out.println("file can not name:"+ fileNameConstraint);
 //		removeDir("D:" + File.separator + "com.sugon.cloudstor.clouddisk.test.1");
 
-		String path = getTmpeFolder();
-		System.out.println("Temp Path:" + path);
+//		String path = getTmpeFolder();
+//		System.out.println("Temp Path:" + path);
 
 //		int filelen = fileLengthTest(root, prefix);
 //		System.out.println("max file length:"+ filelen);
@@ -290,5 +323,7 @@ public class FileUtil {
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
+
+	    deleteDir(new File("/tmp"));
 	}
 }

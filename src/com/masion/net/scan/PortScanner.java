@@ -4,7 +4,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -15,7 +18,7 @@ import javax.swing.JTextField;
 public class PortScanner extends JFrame {
 
 	private static final long serialVersionUID = 2829475409962012110L;
-	private static final int maxThread = 10;
+	private static final int maxThreadNum = 20;
 	public static JTextArea resultText;
 	public static JTextField startIP;
 	public static JTextField endIP;
@@ -24,6 +27,14 @@ public class PortScanner extends JFrame {
 	public static JButton submitButton;
 
 	public static Boolean isRunning = false;
+	private List<ScanThread> threadList = null;
+
+	private void setAllTextEnabled(boolean enabled){
+	    startIP.setEnabled(enabled);
+	    endIP.setEnabled(enabled);
+	    minPort.setEnabled(enabled);
+	    maxPort.setEnabled(enabled);
+	}
 
 	public PortScanner() {
 		super();
@@ -37,7 +48,7 @@ public class PortScanner extends JFrame {
 		startIPLable.setText("起始IP:");
 		this.add(startIPLable, null);
 
-		startIP = new JTextField("10.0.31.50");
+		startIP = new JTextField("10.0.20.1");
 		startIP.setBounds(86, 20, 120, 20);
 		this.add(startIP, null);
 
@@ -46,7 +57,7 @@ public class PortScanner extends JFrame {
 		endIPLable.setText("终止IP:");
 		this.add(endIPLable, null);
 
-		endIP = new JTextField("10.0.31.70");
+		endIP = new JTextField("10.0.20.253");
 		endIP.setBounds(310, 20, 120, 20);
 		this.add(endIP, null);
 
@@ -55,7 +66,7 @@ public class PortScanner extends JFrame {
 		startPortLable.setText("Min Port:");
 		this.add(startPortLable, null);
 
-		minPort = new JTextField("22");
+		minPort = new JTextField("161");
 		minPort.setBounds(86, 45, 120, 20);
 		this.add(minPort, null);
 
@@ -64,12 +75,13 @@ public class PortScanner extends JFrame {
 		endPortLable.setText("Max Port:");
 		this.add(endPortLable, null);
 
-		maxPort = new JTextField("80");
+		maxPort = new JTextField("161");
 		maxPort.setBounds(310, 45, 120, 20);
 		this.add(maxPort, null);
 
 		resultText = new JTextArea();
 		resultText.setBounds(30, 120, 420, 200);
+		resultText.setAutoscrolls(true);
 		this.add(resultText, null);
 
 		this.initAction();
@@ -81,47 +93,63 @@ public class PortScanner extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource().equals(submitButton)) {
 					if (isRunning) {
+					    setAllTextEnabled(true);
 						submitButton.setText("开始");
 						isRunning = false;
-						TcpThread.setStop(true);
+						ScanThread.setStop(true);
 					} else {
+                        setAllTextEnabled(false);
 						isRunning = true;
 						submitButton.setText("停止");
 						PortScanner.resultText.setText("");
 
-						TcpThread.maxThreadNum = maxThread;
+						ScanThread.maxThreadNum = maxThreadNum;
 						try {
 							Integer minp = Integer.parseInt("" + minPort.getText());
-							TcpThread.minPort = minp;
+							ScanThread.minPort = minp;
 						} catch (Exception ee) {
 						}
 
 						try {
 							Integer maxp = Integer.parseInt("" + maxPort.getText());
-							TcpThread.maxPort = maxp;
+							ScanThread.maxPort = maxp;
 						} catch (Exception ee) {
 						}
 
-						String starthost = startIP.getText();
-						String[] ips = starthost.split("\\.");
-						TcpThread.ip1 = Integer.parseInt("" + ips[0]);
-						TcpThread.ip2 = Integer.parseInt("" + ips[1]);
-						TcpThread.ip3 = Integer.parseInt("" + ips[2]);
-						TcpThread.ipstart = Integer.parseInt("" + ips[3]);
+						ScanThread.ipStart = startIP.getText();
+						ScanThread.ipEnd =  endIP.getText();
 
-						String endhost = endIP.getText();
-						String[] ipe = endhost.split("\\.");
-						TcpThread.ip1 = Integer.parseInt("" + ipe[0]);
-						TcpThread.ip2 = Integer.parseInt("" + ipe[1]);
-						TcpThread.ip3 = Integer.parseInt("" + ipe[2]);
-						TcpThread.ipend = Integer.parseInt("" + ipe[3]);
+						PortScanner.resultText.append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 扫描开始\n");
 
-						PortScanner.resultText.append(new Date() + " 扫描开始\n");
-
-						for (int i = 0; i < maxThread; i++) {
-							TcpThread th = new TcpThread("PortScanThread" + i, i);
+						threadList = new ArrayList<ScanThread>();
+						for (int i = 0; i < maxThreadNum; i++) {
+							ScanThread th = new ScanThread(i);
+							threadList.add(th);
 							th.start();
 						}
+
+						new Thread(){
+    						public void run(){
+    						int stopNum = 0;
+    						while(stopNum < maxThreadNum){
+    						    for(ScanThread t: threadList){
+    						        if(!t.isAlive()){
+    						            stopNum++ ;
+    						        }
+    						    }
+    						    try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e1) {
+                                    e1.printStackTrace();
+                                }
+    						}
+                            setAllTextEnabled(true);
+                            submitButton.setText("开始");
+                            isRunning = false;
+                            ScanThread.setStop(true);
+                            PortScanner.resultText.append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 扫描结束\n");
+    						}
+						}.start();
 					}
 				}
 			}

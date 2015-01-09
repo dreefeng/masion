@@ -67,7 +67,7 @@ public class Ping {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public static void main1(String[] args) {
 
 		String host = "10.0.50.96";
 		if (args.length > 0) {
@@ -82,4 +82,5 @@ public class Ping {
 
 
 	}
+
 }

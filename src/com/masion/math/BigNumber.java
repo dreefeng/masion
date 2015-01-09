@@ -4,7 +4,7 @@ import java.math.BigInteger;
 
 public class BigNumber {
 
-	public static void test() {
+	public static void add() {
 		Integer i = new Integer(Integer.MAX_VALUE);
 
 		BigInteger bi = new BigInteger("2147483647");
@@ -13,8 +13,8 @@ public class BigNumber {
 		System.out.println(bi.add(BigInteger.ONE));
 	}
 
-	public static void main(String[] args) {
-		Integer i = 0;
+	public static void max(){
+	    Integer i = 0;
 		do {
 			i=i+1024;
 			if(i % 1024000 == 0)
@@ -22,5 +22,11 @@ public class BigNumber {
 		} while (true);
 
 	}
+
+    public static void main(String[] args) {
+        float fla = Integer.MAX_VALUE;
+        float fl = Integer.MIN_VALUE;
+        System.out.println(fl);
+    }
 
 }
